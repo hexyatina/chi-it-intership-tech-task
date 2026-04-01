@@ -11,10 +11,11 @@ db = PostgresqlDatabase(
     host=os.getenv("DB_HOST"),
     port=int(os.getenv("DB_PORT")),
 )
-
+"""
 try:
     db.connect()
     print("good job")
     db.close()
 except Exception as e:
     print(f"u made a steak at: {e}")
+"""

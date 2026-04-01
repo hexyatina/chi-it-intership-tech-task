@@ -21,6 +21,7 @@ _env
 # Database
 *.db
 *.sqlite3
+test.db
 
 # IDE
 .idea/
