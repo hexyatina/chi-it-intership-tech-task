@@ -1,9 +1,8 @@
-import os
 import pytest
 from fastapi.testclient import TestClient
 from peewee import SqliteDatabase
 from creating_tables import User, Article
-from auth import hash_password
+from backend.routers.auth import hash_password
 
 TEST_DB_PATH = "test.db"
 test_db = SqliteDatabase(TEST_DB_PATH)

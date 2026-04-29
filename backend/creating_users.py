@@ -1,7 +1,7 @@
 
 from db import db
 from creating_tables import User, Article
-from auth import hash_password
+from backend.routers.auth import hash_password
 password = ["admin_pass", "editor_pass", "user_pass"]
 
 db.connect()

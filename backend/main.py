@@ -1,18 +1,22 @@
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from creating_tables import User, Article
-from auth import verify_password, create_token, decode_token
-from schemas import ArticleCreate, ArticleUpdate, ArticleResponse, UserUpdate
+from backend.routers.auth import verify_password, create_token, decode_token
+from schemas import ArticleCreate, ArticleUpdate, UserUpdate
+from contextlib import asynccontextmanager
 
-app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     database = User._meta.database
     if database.is_closed():
         database.connect()
     database.create_tables([User, Article], safe=True)
+
+    yield
+    database.close()
+app = FastAPI(lifespan=lifespan)
 
 @app.on_event("shutdown")
 def shutdown():
@@ -85,9 +89,9 @@ def update_article(article_id: int, data: ArticleUpdate, current_user: User = De
     if current_user.role == "user" and article.author_id != current_user.id:
         raise HTTPException(status_code=403, detail="You are not allowed to modify")
 
-    if data.title:
+    if data.title is not None:
         article.title = data.title
-    if data.content:
+    if data.content is not None:
         article.content = data.content
     article.save()
     return {"id": article.id, "title": article.title, "content": article.content,
@@ -136,9 +140,9 @@ def update_user(user_id: int, data: UserUpdate, current_user: User = Depends(get
     user = User.get_or_none(User.id == user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if data.role:
+    if data.role is not None:
         user.role = data.role
-    if data.username:
+    if data.username is not None:
         user.username = data.username
     user.save()
     return {"id": user.id, "username": user.username, "role": user.role}
